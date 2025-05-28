@@ -12,9 +12,9 @@ const Home = () => {
   return (
     <div className="space-y-16 pt-16">
       {/* Hero Section */}
-      <section className="min-h-[90vh] flex flex-col items-center justify-center relative overflow-hidden">
+      <section className="min-h-[70vh] flex flex-col items-center justify-center relative overflow-hidden">
         {/* Spotlight effect */}
-        <div className="spotlight" style={{ left: '50%', top: '50%' }}></div>
+        {/* <div className="spotlight" style={{ left: '50%', top: '50%' }}></div> */}
         
         {/* 3D Logo Animation */}
         <motion.div
@@ -33,7 +33,7 @@ const Home = () => {
         {/* Main Heading */}
         <motion.h1 
           className="text-center font-display font-black text-4xl md:text-6xl lg:text-7xl mb-4 text-white"
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 60 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.8 }}
           style={{ 
@@ -53,10 +53,10 @@ const Home = () => {
           <Typewriter
             options={{
               strings: [
-                'Where Stories Come Alive',
-                'Unite Through Theatre',
-                'Inspire, Create, Perform',
-                'Experience The Magic Of Stage'
+                'Where Stories Come Alive..',
+                'Unite Through Theatre..',
+                'Inspire, Create, Perform..',
+                'Experience The Magic Of Stage..'
               ],
               autoStart: true,
               loop: true,
@@ -85,7 +85,7 @@ const Home = () => {
         
         {/* Scroll Indicator */}
         <motion.div 
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+          className="absolute bottom-4 transform -translate-x-1/2"
           animate={{ 
             y: [0, 10, 0],
             opacity: [0.4, 1, 0.4]

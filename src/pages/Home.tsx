@@ -85,9 +85,9 @@ const Home = () => {
         
         {/* Scroll Indicator */}
         <motion.div 
-          className="absolute bottom-4 transform -translate-x-1/2"
+          className="absolute bottom-2 transform -translate-x-1/2"
           animate={{ 
-            y: [0, 10, 0],
+            y: [0, 5, 0],
             opacity: [0.4, 1, 0.4]
           }}
           transition={{ 

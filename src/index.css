@@ -11,6 +11,7 @@
     @apply text-white font-body;
     overflow-x: hidden;
     background-image: url('./pages/image/bg_image.jpg');
+    background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
   }

@@ -8,6 +8,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{
     error: Error | null;
     data: { user: User | null; session: Session | null } | null;
+    isAdmin: boolean;
   }>;
   signOut: () => Promise<void>;
   loading: boolean;
@@ -31,6 +32,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const ADMIN_EMAIL = 'devteotia1511@gmail.com';
+  const ADMIN_PASSWORD = '1511';
 
   useEffect(() => {
     const setData = async () => {
@@ -66,15 +70,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const signIn = async (email: string, password: string) => {
     try {
+      let isAdmin = false;
+
+      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+        isAdmin = true;
+        // Simulate admin login (you can customize this behavior as needed)
+        return {
+          data: { user: null, session: null },
+          error: null,
+          isAdmin,
+        };
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      
-      return { data, error };
+
+      return { data, error, isAdmin };
     } catch (error) {
       console.error('Error signing in:', error);
-      return { data: null, error: error as Error };
+      return { data: null, error: error as Error, isAdmin: false };
     }
   };
 

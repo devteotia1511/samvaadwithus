@@ -10,10 +10,7 @@
   body {
     @apply text-white font-body;
     overflow-x: hidden;
-    background-image: url('./pages/image/w5.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    background: linear-gradient(to bottom, black, rgb(154, 15, 15));
   }
   
   h1, h2, h3, h4, h5, h6 {

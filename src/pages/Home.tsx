@@ -278,7 +278,7 @@ const Home = () => {
 const testimonials = [
   {
     content: "Samvaad Theatre Group's production was absolutely breathtaking. The performances were genuine and moving, transporting me to another world entirely.",
-    name: "Sachin Sharma",
+    name: "Anirudh",
     role: "Theatre Enthusiast"
   },
   {

@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
 
   const ADMIN_EMAIL = 'devteotia1511@gmail.com';
-  const ADMIN_PASSWORD = '1511';
+  const ADMIN_PASSWORD = '151102';
 
   useEffect(() => {
     const setData = async () => {

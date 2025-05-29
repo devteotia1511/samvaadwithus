@@ -70,15 +70,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      let isAdmin = false;
-
       if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        isAdmin = true;
-        // Simulate admin login (you can customize this behavior as needed)
+        // Create a mock user for admin
+        const mockUser = {
+          id: 'admin',
+          email: ADMIN_EMAIL,
+          role: 'admin',
+          created_at: new Date().toISOString(),
+        };
+        
+        setUser(mockUser as User);
         return {
-          data: { user: null, session: null },
+          data: { 
+            user: mockUser as User, 
+            session: null 
+          },
           error: null,
-          isAdmin,
+          isAdmin: true,
         };
       }
 
@@ -87,16 +95,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         password,
       });
 
-      return { data, error, isAdmin };
+      return { 
+        data, 
+        error, 
+        isAdmin: false 
+      };
     } catch (error) {
       console.error('Error signing in:', error);
-      return { data: null, error: error as Error, isAdmin: false };
+      return { 
+        data: null, 
+        error: error as Error, 
+        isAdmin: false 
+      };
     }
   };
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
     } catch (error) {
       console.error('Error signing out:', error);
     }

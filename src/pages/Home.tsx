@@ -13,9 +13,6 @@ const Home = () => {
     <div className="space-y-16 pt-16">
       {/* Hero Section */}
       <section className="min-h-[70vh] flex flex-col items-center justify-center relative overflow-hidden">
-        {/* Spotlight effect */}
-        {/* <div className="spotlight" style={{ left: '50%', top: '50%' }}></div> */}
-        
         {/* 3D Logo Animation */}
         <motion.div
           initial={{ scale: 0, rotateY: -180 }}
@@ -27,7 +24,11 @@ const Home = () => {
           }}
           className="mb-6"
         >
-          <Theater className="h-24 w-24 md:h-32 md:w-32 text-primary-500" />
+          <img 
+            src="/src/pages/image/logo.png" 
+            alt="Samvaad Theatre Logo" 
+            className="h-32 w-32 object-contain"
+          />
         </motion.div>
         
         {/* Main Heading */}
@@ -68,7 +69,7 @@ const Home = () => {
         
         {/* CTA Buttons */}
         <motion.div 
-          className="flex flex-col sm:flex-row gap-4"
+          className="flex flex-col sm:flex-row gap-4 relative z-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.6, duration: 0.8 }}
@@ -85,7 +86,7 @@ const Home = () => {
         
         {/* Scroll Indicator */}
         <motion.div 
-          className="absolute bottom-2 transform -translate-x-1/2"
+          className="absolute bottom-2 left-1/2 transform -translate-x-1/2 z-0"
           animate={{ 
             y: [0, 5, 0],
             opacity: [0.4, 1, 0.4]

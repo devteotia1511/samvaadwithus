@@ -12,12 +12,8 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 export type Event = {
   id: string;
   title: string;
-  description: string;
   date: string;
-  time: string;
-  venue: string;
   image_url: string;
-  is_upcoming: boolean;
   created_at: string;
 };
 

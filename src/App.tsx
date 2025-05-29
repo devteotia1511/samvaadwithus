@@ -7,7 +7,7 @@ import AdminRoute from './components/auth/AdminRoute';
 
 // Lazy load pages
 const Home = lazy(() => import('./pages/Home'));
-const About = lazy(() => import('./pages/About'));
+// const About = lazy(() => import('./pages/About'));
 const Events = lazy(() => import('./pages/Events'));
 const Gallery = lazy(() => import('./pages/Gallery'));
 const Core = lazy(() => import('./pages/Core'));

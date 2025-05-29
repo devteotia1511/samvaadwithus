@@ -24,8 +24,8 @@ const Home = () => {
           }}
           className="mb-6"
         >
-          <img 
-            src="/src/pages/image/logo.png" 
+          <img
+            src="/src/pages/image/qmlogo.png" 
             alt="Samvaad Theatre Logo" 
             className="h-32 w-32 object-contain"
           />

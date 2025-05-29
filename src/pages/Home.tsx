@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import Typewriter from 'typewriter-effect';
 import { Link } from 'react-router-dom';
 import { Theater, Calendar, Camera, Users, MoveRight } from 'lucide-react';
+import qmlogo from '../pages/image/qmlogo.png';
 
 const Home = () => {
   useEffect(() => {
@@ -25,7 +26,7 @@ const Home = () => {
           className="mb-6"
         >
           <img
-            src="/src/pages/image/qmlogo.png" 
+            src={qmlogo}
             alt="Samvaad Theatre Logo" 
             className="h-32 w-32 object-contain"
           />

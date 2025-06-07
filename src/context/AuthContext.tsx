@@ -11,6 +11,7 @@ interface AuthContextType {
   }>;
   signOut: () => Promise<void>;
   loading: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,6 +32,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Check if user is admin
+  const isAdmin = user?.user_metadata?.role === 'admin' || user?.app_metadata?.role === 'admin';
 
   useEffect(() => {
     const setData = async () => {
@@ -103,6 +107,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     signIn,
     signOut,
     loading,
+    isAdmin,
   };
 
   return (

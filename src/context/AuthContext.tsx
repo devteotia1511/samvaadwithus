@@ -8,7 +8,6 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{
     error: Error | null;
     data: { user: User | null; session: Session | null } | null;
-    isAdmin: boolean;
   }>;
   signOut: () => Promise<void>;
   loading: boolean;
@@ -32,9 +31,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const ADMIN_EMAIL = 'devteotia1511@gmail.com';
-  const ADMIN_PASSWORD = '151102';
 
   useEffect(() => {
     const setData = async () => {
@@ -70,26 +66,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        // Create a mock user for admin
-        const mockUser = {
-          id: 'admin',
-          email: ADMIN_EMAIL,
-          role: 'admin',
-          created_at: new Date().toISOString(),
-        };
-        
-        setUser(mockUser as User);
-        return {
-          data: { 
-            user: mockUser as User, 
-            session: null 
-          },
-          error: null,
-          isAdmin: true,
-        };
-      }
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -97,21 +73,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       return { 
         data, 
-        error, 
-        isAdmin: false 
+        error
       };
     } catch (error) {
       console.error('Error signing in:', error);
       return { 
         data: null, 
-        error: error as Error, 
-        isAdmin: false 
+        error: error as Error
       };
     }
   };
 
   const signOut = async () => {
     try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error signing out:', error);
+      }
       setUser(null);
       setSession(null);
     } catch (error) {

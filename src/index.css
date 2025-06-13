@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply text-white font-body;
+    overflow-x: hidden;
+    background: linear-gradient(to bottom, black, rgb(154, 15, 15));
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold leading-tight;
+  }
+  
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+  
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+  
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+  
+  p {
+    @apply leading-relaxed;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-md font-semibold transition-all duration-300;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-white;
+  }
+  
+  .btn-outline {
+    @apply border-2 border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white;
+  }
+  
+  .section {
+    @apply py-12 md:py-20;
+  }
+  
+  .container {
+    @apply mx-auto px-4 max-w-7xl;
+  }
+  
+  .card {
+    @apply bg-dark-400 rounded-lg overflow-hidden shadow-lg transition-all duration-300;
+  }
+  
+  .nav-link {
+    @apply text-white hover:text-primary-500 transition-colors duration-300 relative;
+  }
+  
+  .nav-link::after {
+    @apply content-[''] absolute bottom-0 left-0 w-0 h-0.5 bg-primary-500 transition-all duration-300;
+  }
+  
+  .nav-link:hover::after {
+    @apply w-full;
+  }
+  
+  .nav-link.active {
+    @apply text-primary-500;
+  }
+  
+  .nav-link.active::after {
+    @apply w-full;
+  }
+  
+  /* Remove curtain effect */
+  .curtain-left,
+  .curtain-right {
+    display: none;
+  }
+  
+  /* Remove spotlight effect */
+  .spotlight {
+    display: none;
+  }
+  
+  .grid-gallery {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+  }
+  
+  .team-card {
+    @apply card hover:scale-105 hover:shadow-2xl overflow-hidden;
+  }
+  
+  .event-card {
+    @apply card hover:shadow-2xl overflow-hidden;
+  }
+  
+  .admin-section {
+    @apply bg-dark-400 p-6 rounded-lg mb-8;
+  }
+  
+}

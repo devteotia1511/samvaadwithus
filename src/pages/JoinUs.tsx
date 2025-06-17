@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { supabase, Department } from '../lib/supabase';
-import { Users, ArrowUpRight, CheckCircle, Send, Loader } from 'lucide-react';
+import { Send, CheckCircle, ArrowUpRight } from 'lucide-react';
 
 const JoinUs = () => {
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -213,34 +213,20 @@ This is an application to join Samvaad Theatre Group.`
               Explore the various departments where you can contribute your talents
             </p>
           </div>
-          
-          {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {departments.map((department, index) => (
-                <motion.div
-                  key={department.id}
-                  className="bg-dark-300 p-6 rounded-lg hover:bg-dark-200 transition-colors"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                >
-                  <h3 className="text-xl font-bold mb-3">{department.name}</h3>
-                  <p className="text-gray-300 mb-4">{department.description}</p>
-                  <a 
-                    href="#application" 
-                    className="inline-flex items-center text-primary-500 hover:text-primary-400 transition-colors"
-                  >
-                    Apply for this department <ArrowUpRight className="h-4 w-4 ml-1" />
-                  </a>
-                </motion.div>
-              ))}
-            </div>
-          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              'Acting',
+              'Graphics Designing',
+              'Video Editing',
+              'Promotions',
+              'Decor',
+              'Others (Dancing/Singing)'
+            ].map((dept, idx) => (
+              <div key={dept} className="bg-dark-300 p-6 rounded-lg text-center text-xl font-bold text-white">
+                {dept}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -273,179 +259,6 @@ This is an application to join Samvaad Theatre Group.`
               </div>
             </motion.div>
           ))}
-        </div>
-      </section>
-
-      {/* Application Form */}
-      <section id="application" className="section bg-dark-400 py-16 rounded-lg">
-        <div className="container max-w-3xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Apply Now</h2>
-            <div className="w-16 h-1 bg-primary-500 mx-auto mb-6"></div>
-            <p className="text-gray-300">
-              Fill out the form below to express your interest in joining Samvaad Theatre Group
-            </p>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <div className="bg-dark-300 p-6 md:p-8 rounded-lg">
-              {submitMessage && (
-                <div className={`mb-6 p-4 rounded-md ${
-                  submitMessage.type === 'success' 
-                    ? 'bg-green-500/20 border border-green-500 text-green-300' 
-                    : 'bg-red-500/20 border border-red-500 text-red-300'
-                }`}>
-                  {submitMessage.text}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <label htmlFor="firstName" className="block text-white mb-2">First Name *</label>
-                    <input 
-                      type="text" 
-                      id="firstName" 
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      className="w-full bg-dark-400 border border-dark-200 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      placeholder="Your first name"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="lastName" className="block text-white mb-2">Last Name *</label>
-                    <input 
-                      type="text" 
-                      id="lastName" 
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                      className="w-full bg-dark-400 border border-dark-200 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      placeholder="Your last name"
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <div className="mb-6">
-                  <label htmlFor="email" className="block text-white mb-2">Email *</label>
-                  <input 
-                    type="email" 
-                    id="email" 
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full bg-dark-400 border border-dark-200 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder="Your email address"
-                    required
-                  />
-                </div>
-                
-                <div className="mb-6">
-                  <label htmlFor="phone" className="block text-white mb-2">Phone *</label>
-                  <input 
-                    type="tel" 
-                    id="phone" 
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full bg-dark-400 border border-dark-200 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder="Your phone number"
-                    required
-                  />
-                </div>
-                
-                <div className="mb-6">
-                  <label htmlFor="department" className="block text-white mb-2">Department of Interest *</label>
-                  <select 
-                    id="department" 
-                    name="department"
-                    value={formData.department}
-                    onChange={handleInputChange}
-                    className="w-full bg-dark-400 border border-dark-200 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    required
-                  >
-                    <option value="">Select a department</option>
-                    {departments.map(dept => (
-                      <option key={dept.id} value={dept.id}>{dept.name}</option>
-                    ))}
-                  </select>
-                </div>
-                
-                <div className="mb-6">
-                  <label htmlFor="experience" className="block text-white mb-2">Previous Experience</label>
-                  <textarea 
-                    id="experience" 
-                    name="experience"
-                    value={formData.experience}
-                    onChange={handleInputChange}
-                    rows={4}
-                    className="w-full bg-dark-400 border border-dark-200 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder="Briefly describe your relevant experience (if any)"
-                  ></textarea>
-                </div>
-                
-                <div className="mb-6">
-                  <label htmlFor="motivation" className="block text-white mb-2">Why do you want to join Samvaad?</label>
-                  <textarea 
-                    id="motivation" 
-                    name="motivation"
-                    value={formData.motivation}
-                    onChange={handleInputChange}
-                    rows={4}
-                    className="w-full bg-dark-400 border border-dark-200 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder="Tell us why you're interested in joining our theatre group"
-                  ></textarea>
-                </div>
-                
-                <div className="flex items-center mb-6">
-                  <input 
-                    type="checkbox" 
-                    id="terms" 
-                    name="terms"
-                    checked={formData.terms}
-                    onChange={handleInputChange}
-                    className="h-4 w-4 text-primary-500 focus:ring-primary-500 border-dark-200 rounded"
-                    required
-                  />
-                  <label htmlFor="terms" className="ml-2 block text-gray-300">
-                    I agree to the terms and conditions *
-                  </label>
-                </div>
-                
-                <button 
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="btn btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader className="h-5 w-5 mr-2 animate-spin" />
-                      Submitting Application...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="h-5 w-5 mr-2" />
-                      Submit Application
-                    </>
-                  )}
-                </button>
-              </form>
-            </div>
-          </motion.div>
         </div>
       </section>
 

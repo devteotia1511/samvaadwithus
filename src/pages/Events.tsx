@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { supabase, Event, dataService } from '../lib/supabase';
-import { Calendar, Clock, MapPin, Users } from 'lucide-react';
+import { Calendar, Clock, MapPin } from 'lucide-react';
+import { dataService, Event } from '../lib/supabase';
 import { useRealtimeSync } from '../hooks/useRealtimeSync';
 
 const Events = () => {
@@ -61,14 +61,39 @@ const Events = () => {
   };
 
   const filteredEvents = events.filter(event => {
-    if (filter === 'all') return true;
-    if (filter === 'upcoming') return event.is_upcoming;
-    if (filter === 'past') return !event.is_upcoming;
+    const eventDate = new Date(event.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (filter === 'upcoming') return eventDate >= today;
+    if (filter === 'past') return eventDate < today;
     return true;
   });
 
   const upcomingEvents = events.filter(event => event.is_upcoming);
   const pastEvents = events.filter(event => !event.is_upcoming);
+
+  if (loading) {
+    return (
+      <div className="pt-24 pb-16">
+        <div className="container">
+          <div className="max-w-6xl mx-auto">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-700 rounded w-1/3 mb-8"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="bg-dark-400 p-6 rounded-lg border border-dark-300">
+                    <div className="h-6 bg-gray-600 rounded w-1/2 mb-4"></div>
+                    <div className="h-4 bg-gray-600 rounded w-3/4"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-24 space-y-16">
@@ -132,11 +157,7 @@ const Events = () => {
 
       {/* Events List */}
       <section className="container">
-        {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
-          </div>
-        ) : filteredEvents.length === 0 ? (
+        {filteredEvents.length === 0 ? (
           <div className="text-center py-16">
             <Calendar className="h-16 w-16 text-gray-500 mx-auto mb-4" />
             <h3 className="text-2xl font-display mb-4">No events found</h3>
@@ -204,7 +225,6 @@ const Events = () => {
                   {event.is_upcoming && (
                     <div className="flex space-x-3">
                       <button className="btn btn-primary flex-1">
-                        <Users className="h-4 w-4 mr-2" />
                         Book Tickets
                       </button>
                       <button className="btn btn-outline">

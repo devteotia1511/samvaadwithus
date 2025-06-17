@@ -1,14 +1,13 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { useNotification } from './useNotification';
 
-interface RealtimeSyncOptions {
+interface UseRealtimeSyncOptions {
   table: string;
-  onInsert?: (payload: any) => void;
-  onUpdate?: (payload: any) => void;
-  onDelete?: (payload: any) => void;
-  enabled?: boolean;
+  onInsert?: (payload: { new: Record<string, unknown>; old: Record<string, unknown> }) => void;
+  onUpdate?: (payload: { new: Record<string, unknown>; old: Record<string, unknown> }) => void;
+  onDelete?: (payload: { new: Record<string, unknown>; old: Record<string, unknown> }) => void;
   showNotifications?: boolean;
 }
 
@@ -17,14 +16,40 @@ export const useRealtimeSync = ({
   onInsert,
   onUpdate,
   onDelete,
-  enabled = true,
-  showNotifications = true
-}: RealtimeSyncOptions) => {
-  const channelRef = useRef<RealtimeChannel | null>(null);
+  showNotifications = true,
+}: UseRealtimeSyncOptions) => {
   const { addNotification } = useNotification();
-  const [connected, setConnected] = useState(false);
 
-  const handleInsert = useCallback((payload: any) => {
+  useEffect(() => {
+    const channel: RealtimeChannel = supabase
+      .channel(`${table}_changes`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: table,
+        },
+        (payload) => {
+          console.log(`${table} real-time update:`, payload);
+
+          if (payload.eventType === 'INSERT' && onInsert) {
+            onInsert(payload);
+          } else if (payload.eventType === 'UPDATE' && onUpdate) {
+            onUpdate(payload);
+          } else if (payload.eventType === 'DELETE' && onDelete) {
+            onDelete(payload);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [table, onInsert, onUpdate, onDelete]);
+
+  const handleInsert = (payload: { new: Record<string, unknown>; old: Record<string, unknown> }) => {
     console.log(`Real-time INSERT on ${table}:`, payload);
     onInsert?.(payload);
     
@@ -36,9 +61,9 @@ export const useRealtimeSync = ({
         duration: 3000
       });
     }
-  }, [table, onInsert, showNotifications, addNotification]);
+  };
 
-  const handleUpdate = useCallback((payload: any) => {
+  const handleUpdate = (payload: { new: Record<string, unknown>; old: Record<string, unknown> }) => {
     console.log(`Real-time UPDATE on ${table}:`, payload);
     onUpdate?.(payload);
     
@@ -50,9 +75,9 @@ export const useRealtimeSync = ({
         duration: 3000
       });
     }
-  }, [table, onUpdate, showNotifications, addNotification]);
+  };
 
-  const handleDelete = useCallback((payload: any) => {
+  const handleDelete = (payload: { new: Record<string, unknown>; old: Record<string, unknown> }) => {
     console.log(`Real-time DELETE on ${table}:`, payload);
     onDelete?.(payload);
     
@@ -64,72 +89,11 @@ export const useRealtimeSync = ({
         duration: 3000
       });
     }
-  }, [table, onDelete, showNotifications, addNotification]);
-
-  useEffect(() => {
-    if (!enabled) return;
-
-    // Create channel with unique name
-    const channelName = `${table}_realtime_${Date.now()}`;
-    const channel = supabase
-      .channel(channelName)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: table,
-        },
-        handleInsert
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: table,
-        },
-        handleUpdate
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'DELETE',
-          schema: 'public',
-          table: table,
-        },
-        handleDelete
-      )
-      .subscribe((status) => {
-        console.log(`Real-time subscription status for ${table}:`, status);
-        if (status === 'SUBSCRIBED') {
-          setConnected(true);
-        }
-      });
-
-    channelRef.current = channel;
-    setConnected(false);
-
-    return () => {
-      if (channelRef.current) {
-        console.log(`Unsubscribing from ${table} real-time updates`);
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-        setConnected(false);
-      }
-    };
-  }, [table, enabled, handleInsert, handleUpdate, handleDelete]);
-
-  const disconnect = useCallback(() => {
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-      channelRef.current = null;
-      setConnected(false);
-    }
-  }, []);
+  };
 
   return {
-    isConnected: connected,
-    disconnect
+    handleInsert,
+    handleUpdate,
+    handleDelete
   };
 };

@@ -4,13 +4,15 @@ import { motion } from 'framer-motion';
 import { Theater, Calendar, Camera, Users, Settings, LogOut, Menu, X, Shield } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../hooks/useNotification';
+import { lazy, Suspense } from 'react';
+import LoadingScreen from '../components/common/LoadingScreen';
 
-// Admin Subpages
-import AdminDashboard from '../components/admin/AdminDashboard';
-import AdminEvents from '../components/admin/AdminEvents';
-import AdminGallery from '../components/admin/AdminGallery';
-import AdminTeam from '../components/admin/AdminTeam';
-import AdminSettings from '../components/admin/AdminSettings';
+// Lazy load admin components
+const AdminDashboard = lazy(() => import('../components/admin/AdminDashboard'));
+const AdminEvents = lazy(() => import('../components/admin/AdminEvents'));
+const AdminGallery = lazy(() => import('../components/admin/AdminGallery'));
+const AdminTeam = lazy(() => import('../components/admin/AdminTeam'));
+const AdminSettings = lazy(() => import('../components/admin/AdminSettings'));
 
 const Admin = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -33,7 +35,7 @@ const Admin = () => {
           message: 'You have been securely logged out of the admin panel.'
         });
         navigate('/');
-      } catch (error) {
+      } catch {
         addNotification({
           type: 'error',
           title: 'Logout Error',
@@ -240,13 +242,15 @@ const Admin = () => {
               className="bg-dark-400 rounded-lg shadow-xl overflow-hidden"
             >
               <div className="p-4 sm:p-6 lg:p-8">
-                <Routes>
-                  <Route path="/" element={<AdminDashboard />} />
-                  <Route path="/events" element={<AdminEvents />} />
-                  <Route path="/gallery" element={<AdminGallery />} />
-                  <Route path="/team" element={<AdminTeam />} />
-                  <Route path="/settings" element={<AdminSettings />} />
-                </Routes>
+                <Suspense fallback={<LoadingScreen />}>
+                  <Routes>
+                    <Route path="/" element={<AdminDashboard />} />
+                    <Route path="/events" element={<AdminEvents />} />
+                    <Route path="/gallery" element={<AdminGallery />} />
+                    <Route path="/team" element={<AdminTeam />} />
+                    <Route path="/settings" element={<AdminSettings />} />
+                  </Routes>
+                </Suspense>
               </div>
             </motion.div>
           </div>

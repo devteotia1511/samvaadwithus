@@ -2,10 +2,17 @@ import { useAuth } from '../context/AuthContext';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
+interface TestResults {
+  connection?: boolean;
+  error?: string;
+  adminTableAccessible?: boolean;
+  adminTableError?: string;
+}
+
 const TestAuth = () => {
   const { user, session, loading, isAdmin, signOut } = useAuth();
   const [supabaseStatus, setSupabaseStatus] = useState<string>('Checking...');
-  const [testResults, setTestResults] = useState<any>({});
+  const [testResults, setTestResults] = useState<TestResults>({});
 
   useEffect(() => {
     console.log('=== AUTH DEBUG INFO ===');
@@ -21,7 +28,7 @@ const TestAuth = () => {
       setSupabaseStatus('Testing connection...');
       
       // Test basic connection
-      const { data, error } = await supabase.from('admin_users').select('count').limit(1);
+      const { error } = await supabase.from('admin_users').select('count').limit(1);
       
       if (error) {
         setSupabaseStatus('❌ Connection failed: ' + error.message);
@@ -38,21 +45,18 @@ const TestAuth = () => {
 
   const testAdminUsersTable = async () => {
     try {
-      const { data, error } = await supabase
-        .from('admin_users')
-        .select('*')
-        .limit(5);
-
+      const { error } = await supabase.from('admin_users').select('*');
+      
       if (error) {
         console.error('Admin users table error:', error);
-        setTestResults(prev => ({ ...prev, adminTable: false, adminError: error.message }));
+        setTestResults(prev => ({ ...prev, adminTableError: error.message }));
       } else {
-        console.log('Admin users:', data);
-        setTestResults(prev => ({ ...prev, adminTable: true, adminUsers: data }));
+        console.log('Admin users table accessible');
+        setTestResults(prev => ({ ...prev, adminTableAccessible: true }));
       }
     } catch (error) {
       console.error('Admin users test error:', error);
-      setTestResults(prev => ({ ...prev, adminTable: false, adminError: (error as Error).message }));
+      setTestResults(prev => ({ ...prev, adminTableError: (error as Error).message }));
     }
   };
 

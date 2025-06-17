@@ -3,8 +3,13 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+console.log('🔧 Supabase Configuration:');
+console.log('URL:', supabaseUrl ? '✅ Set' : '❌ Missing');
+console.log('Key:', supabaseAnonKey ? '✅ Set' : '❌ Missing');
+
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+  console.error('❌ Missing Supabase environment variables');
+  throw new Error('Missing Supabase environment variables. Please check your .env file.');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -14,6 +19,36 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true,
   },
 });
+
+// Test the connection
+supabase.auth.getSession().then(({ error }) => {
+  if (error) {
+    console.error('❌ Supabase connection error:', error);
+  } else {
+    console.log('✅ Supabase connection successful');
+  }
+});
+
+/**
+ * Upload an image file to Supabase Storage and return the public URL.
+ * @param file The image file to upload
+ * @param folder The storage folder (e.g. 'team', 'gallery', 'events')
+ * @returns The public URL of the uploaded image
+ */
+export async function uploadImageToStorage(file: File, folder: string): Promise<string> {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+  const { data, error } = await supabase.storage.from('photos').upload(fileName, file, {
+    cacheControl: '3600',
+    upsert: false,
+    contentType: file.type,
+  });
+  if (error) throw error;
+  // Get public URL
+  const { publicUrl } = supabase.storage.from('photos').getPublicUrl(fileName).data;
+  if (!publicUrl) throw new Error('Failed to get public URL for uploaded image');
+  return publicUrl;
+}
 
 // Database types
 export interface Event {
@@ -68,45 +103,89 @@ export const dataService = {
   // Events
   events: {
     async getAll() {
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .order('date', { ascending: false });
-      
-      if (error) throw error;
-      return data || [];
+      console.log('🔍 dataService.events.getAll() called');
+      try {
+        const { data, error } = await supabase
+          .from('events')
+          .select('*')
+          .order('date', { ascending: false });
+        
+        if (error) {
+          console.error('❌ Supabase error in events.getAll:', error);
+          throw error;
+        }
+        
+        console.log('✅ Events data retrieved:', data);
+        return data || [];
+      } catch (error) {
+        console.error('❌ Error in events.getAll:', error);
+        throw error;
+      }
     },
 
     async create(event: Omit<Event, 'id' | 'created_at'>) {
-      const { data, error } = await supabase
-        .from('events')
-        .insert([event])
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
+      console.log('🔍 dataService.events.create() called with:', event);
+      try {
+        const { data, error } = await supabase
+          .from('events')
+          .insert([event])
+          .select()
+          .single();
+        
+        if (error) {
+          console.error('❌ Supabase error in events.create:', error);
+          throw error;
+        }
+        
+        console.log('✅ Event created successfully:', data);
+        return data;
+      } catch (error) {
+        console.error('❌ Error in events.create:', error);
+        throw error;
+      }
     },
 
     async update(id: string, updates: Partial<Event>) {
-      const { data, error } = await supabase
-        .from('events')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
+      console.log('🔍 dataService.events.update() called with id:', id, 'updates:', updates);
+      try {
+        const { data, error } = await supabase
+          .from('events')
+          .update(updates)
+          .eq('id', id)
+          .select()
+          .single();
+        
+        if (error) {
+          console.error('❌ Supabase error in events.update:', error);
+          throw error;
+        }
+        
+        console.log('✅ Event updated successfully:', data);
+        return data;
+      } catch (error) {
+        console.error('❌ Error in events.update:', error);
+        throw error;
+      }
     },
 
     async delete(id: string) {
-      const { error } = await supabase
-        .from('events')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
+      console.log('🔍 dataService.events.delete() called with id:', id);
+      try {
+        const { error } = await supabase
+          .from('events')
+          .delete()
+          .eq('id', id);
+        
+        if (error) {
+          console.error('❌ Supabase error in events.delete:', error);
+          throw error;
+        }
+        
+        console.log('✅ Event deleted successfully');
+      } catch (error) {
+        console.error('❌ Error in events.delete:', error);
+        throw error;
+      }
     }
   },
 

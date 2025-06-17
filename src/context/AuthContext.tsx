@@ -30,11 +30,7 @@ interface AuthProviderProps {
 
 // Admin email addresses - you can modify this list
 const ADMIN_EMAILS = [
-  'admin@samvaadtheatre.com',
-  'admin@example.com',
-  'devteotia1511@gmail.com', // Add your email here
-  'admin@gmail.com',
-  'administrator@samvaadtheatre.com',
+  'devteotia1511@gmail.com',
   // Add more admin emails as needed
 ];
 

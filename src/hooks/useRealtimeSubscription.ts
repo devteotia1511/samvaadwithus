@@ -1,12 +1,12 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
-interface UseRealtimeSubscriptionProps {
+interface UseRealtimeSubscriptionOptions {
   table: string;
-  onInsert?: (payload: any) => void;
-  onUpdate?: (payload: any) => void;
-  onDelete?: (payload: any) => void;
+  onInsert?: (payload: { new: Record<string, unknown>; old: Record<string, unknown> }) => void;
+  onUpdate?: (payload: { new: Record<string, unknown>; old: Record<string, unknown> }) => void;
+  onDelete?: (payload: { new: Record<string, unknown>; old: Record<string, unknown> }) => void;
   enabled?: boolean;
 }
 
@@ -15,53 +15,39 @@ export const useRealtimeSubscription = ({
   onInsert,
   onUpdate,
   onDelete,
-  enabled = true
-}: UseRealtimeSubscriptionProps) => {
+  enabled = true,
+}: UseRealtimeSubscriptionOptions) => {
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const [connected, setConnected] = useState(false);
 
   useEffect(() => {
     if (!enabled) return;
 
-    // Create channel
-    const channel = supabase
+    const channel: RealtimeChannel = supabase
       .channel(`${table}_changes`)
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: table,
         },
         (payload) => {
-          console.log(`${table} INSERT:`, payload);
-          onInsert?.(payload);
+          console.log(`${table} real-time update:`, payload);
+
+          if (payload.eventType === 'INSERT' && onInsert) {
+            onInsert(payload);
+          } else if (payload.eventType === 'UPDATE' && onUpdate) {
+            onUpdate(payload);
+          } else if (payload.eventType === 'DELETE' && onDelete) {
+            onDelete(payload);
+          }
         }
       )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: table,
-        },
-        (payload) => {
-          console.log(`${table} UPDATE:`, payload);
-          onUpdate?.(payload);
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'DELETE',
-          schema: 'public',
-          table: table,
-        },
-        (payload) => {
-          console.log(`${table} DELETE:`, payload);
-          onDelete?.(payload);
-        }
-      )
-      .subscribe();
+      .subscribe((status) => {
+        console.log(`${table} subscription status:`, status);
+        setConnected(status === 'SUBSCRIBED');
+      });
 
     channelRef.current = channel;
 
@@ -69,9 +55,18 @@ export const useRealtimeSubscription = ({
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
+        setConnected(false);
       }
     };
-  }, [table, onInsert, onUpdate, onDelete, enabled]);
+  }, [table, enabled, onInsert, onUpdate, onDelete]);
 
-  return channelRef.current;
+  const disconnect = useCallback(() => {
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+      setConnected(false);
+    }
+  }, []);
+
+  return { connected, disconnect };
 };

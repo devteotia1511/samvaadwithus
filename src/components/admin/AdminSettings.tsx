@@ -1,18 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { Mail, MessageSquare, Check, Clock, Trash, X, Loader, RefreshCw, KeyRound, MailWarning, Settings, Users, Shield, Plus, Edit, Save, AlertCircle } from 'lucide-react';
+import { Mail, MessageSquare, Check, Clock, Trash, X, Loader, RefreshCw, KeyRound, MailWarning, Users, Shield, Plus, Edit, Save, Trash2 } from 'lucide-react';
 import { useNotification } from '../../hooks/useNotification';
 import LoadingSpinner from '../common/LoadingSpinner';
-
-interface Message {
-  id: string;
-  name: string;
-  email: string;
-  message: string;
-  is_read: boolean;
-  created_at: string;
-}
+import { dataService, Message } from '../../lib/supabase';
 
 interface AdminUser {
   id: string;
@@ -42,68 +34,27 @@ const AdminSettings = () => {
 
   const { user } = useAuth();
 
-  useEffect(() => {
-    fetchMessages();
-    fetchAdminUsers();
-  }, []);
-
   const fetchMessages = async () => {
-    setLoading(true);
     try {
-      // In a real implementation, this would fetch from Supabase
-      // const { data, error } = await supabase.from('messages').select('*').order('created_at', { ascending: false });
-      
-      // For demo purposes, using mock data
-      const mockData: Message[] = [
-        {
-          id: '1',
-          name: 'Aditya Mehta',
-          email: 'aditya.mehta@example.com',
-          message: 'Hello, I\'m interested in joining your next production as a volunteer. I have experience in stage management and would love to contribute. Please let me know if there are any opportunities available.',
-          is_read: false,
-          created_at: '2024-06-15T14:30:00Z'
-        },
-        {
-          id: '2',
-          name: 'Priya Sharma',
-          email: 'priya.sharma@example.com',
-          message: 'I recently attended your production of "Echoes of Time" and was absolutely mesmerized! The performances were exceptional, and the direction was brilliant. Looking forward to your next show!',
-          is_read: true,
-          created_at: '2024-06-10T09:15:00Z'
-        },
-        {
-          id: '3',
-          name: 'Rahul Kapoor',
-          email: 'rahul.kapoor@example.com',
-          message: 'We\'re organizing a cultural festival at our college next month and would love to have Samvaad Theatre Group perform. Could you please share your availability and performance details? We have a budget allocation for professional performances.',
-          is_read: false,
-          created_at: '2024-06-05T16:45:00Z'
-        },
-        {
-          id: '4',
-          name: 'Neha Gupta',
-          email: 'neha.gupta@example.com',
-          message: 'I\'m a theatre studies student working on a research paper about experimental theatre in urban settings. I would love to interview someone from your team about your approach and methodologies. Would this be possible?',
-          is_read: true,
-          created_at: '2024-05-28T11:20:00Z'
-        },
-        {
-          id: '5',
-          name: 'Vikram Singh',
-          email: 'vikram.singh@example.com',
-          message: 'I\'m interested in booking tickets for your upcoming show "The Silent Monologue\" for a group of 15 people. Do you offer any group discounts? Also, is the venue wheelchair accessible?',
-          is_read: true,
-          created_at: '2024-05-20T13:10:00Z'
-        }
-      ];
-      
-      setMessages(mockData);
+      setLoading(true);
+      const data = await dataService.messages.getAll();
+      setMessages(data);
     } catch (error) {
       console.error('Error fetching messages:', error);
+      addNotification({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to load messages'
+      });
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchMessages();
+    fetchAdminUsers();
+  }, []);
 
   const fetchAdminUsers = async () => {
     setLoading(true);
@@ -127,40 +78,44 @@ const AdminSettings = () => {
     }
   };
 
-  const markAsRead = async (id: string) => {
+  const handleMarkAsRead = async (id: string) => {
     try {
-      // In a real implementation, this would interact with Supabase
-      // const { error } = await supabase.from('messages').update({ is_read: true }).eq('id', id);
-      
-      // For demo purposes, update local state
-      setMessages(prev => 
-        prev.map(message => message.id === id ? { ...message, is_read: true } : message)
-      );
+      await dataService.messages.markAsRead(id);
+      addNotification({
+        type: 'success',
+        title: 'Success',
+        message: 'Message marked as read'
+      });
+      fetchMessages();
     } catch (error) {
       console.error('Error marking message as read:', error);
+      addNotification({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to mark message as read'
+      });
     }
   };
 
-  const deleteMessage = async (id: string) => {
-    if (deleteConfirmId !== id) {
-      setDeleteConfirmId(id);
-      return;
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this message?')) {
+      try {
+        await dataService.messages.delete(id);
+        addNotification({
+          type: 'success',
+          title: 'Success',
+          message: 'Message deleted successfully'
+        });
+        fetchMessages();
+      } catch (error) {
+        console.error('Error deleting message:', error);
+        addNotification({
+          type: 'error',
+          title: 'Error',
+          message: 'Failed to delete message'
+        });
+      }
     }
-    
-    try {
-      // In a real implementation, this would interact with Supabase
-      // const { error } = await supabase.from('messages').delete().eq('id', id);
-      
-      // For demo purposes, update local state
-      setMessages(prev => prev.filter(message => message.id !== id));
-      setDeleteConfirmId(null);
-    } catch (error) {
-      console.error('Error deleting message:', error);
-    }
-  };
-
-  const cancelDelete = () => {
-    setDeleteConfirmId(null);
   };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
@@ -345,7 +300,7 @@ const AdminSettings = () => {
     }
   };
 
-  const handleDelete = async (id: string, email: string) => {
+  const handleDeleteAdminUser = async (id: string, email: string) => {
     if (!window.confirm(`Are you sure you want to remove admin access for ${email}?`)) {
       return;
     }
@@ -374,6 +329,28 @@ const AdminSettings = () => {
       });
     }
   };
+
+  if (loading) {
+    return (
+      <div className="pt-24 pb-16">
+        <div className="container">
+          <div className="max-w-6xl mx-auto">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-700 rounded w-1/3 mb-8"></div>
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="bg-dark-400 p-6 rounded-lg border border-dark-300">
+                    <div className="h-6 bg-gray-600 rounded w-1/2 mb-4"></div>
+                    <div className="h-4 bg-gray-600 rounded w-3/4"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -482,7 +459,7 @@ const AdminSettings = () => {
                         {!message.is_read && (
                           <button 
                             className="p-1 hover:bg-dark-300 rounded-md transition-colors"
-                            onClick={() => markAsRead(message.id)}
+                            onClick={() => handleMarkAsRead(message.id)}
                             aria-label="Mark as read"
                           >
                             <Check className="h-4 w-4 text-gray-400 hover:text-primary-500" />
@@ -493,14 +470,14 @@ const AdminSettings = () => {
                           <div className="flex items-center bg-dark-500 p-1 rounded-md">
                             <button
                               className="p-1 hover:bg-red-500/20 rounded-md transition-colors"
-                              onClick={() => deleteMessage(message.id)}
+                              onClick={() => handleDelete(message.id)}
                               aria-label="Confirm delete"
                             >
                               <Check className="h-4 w-4 text-red-500" />
                             </button>
                             <button
                               className="p-1 hover:bg-dark-200 rounded-md transition-colors"
-                              onClick={cancelDelete}
+                              onClick={() => setDeleteConfirmId(null)}
                               aria-label="Cancel delete"
                             >
                               <X className="h-4 w-4 text-gray-400" />
@@ -509,10 +486,10 @@ const AdminSettings = () => {
                         ) : (
                           <button 
                             className="p-1 hover:bg-red-500/20 rounded-md transition-colors"
-                            onClick={() => deleteMessage(message.id)}
+                            onClick={() => setDeleteConfirmId(message.id)}
                             aria-label="Delete message"
                           >
-                            <Trash className="h-4 w-4 text-gray-400 hover:text-red-500" />
+                            <Trash2 className="h-4 w-4 text-gray-400 hover:text-red-500" />
                           </button>
                         )}
                       </div>
@@ -716,7 +693,7 @@ const AdminSettings = () => {
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(user.id, user.email)}
+                          onClick={() => handleDeleteAdminUser(user.id, user.email)}
                           className="p-1 text-red-400 hover:text-red-300 transition-colors"
                           title="Remove"
                         >
